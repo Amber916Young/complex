@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="fragments/headerPage :: headerPage"></div>
+<title>Consumption Info</title>
+<style>
+    #layui-layer100001{
+        width: 400px;
+    }
+</style>
+<body >
+<div >
+    <div >
+        <div th:replace="fragments/headerSide :: headerSide"></div>
+    </div>
+    <div class="col col-lg-2">
+        <div th:replace="fragments/sidebarPage :: sidebarPage"></div>
+    </div>
+    <div class="col col-lg-10">
+        <div class="layui-card " style="margin-top: 2em">
+            <div class="layui-breadcrumb" lay-filter="breadcrumb">
+                <a lay-href="">DB</a>
+                <a><cite>Consumption</cite></a>
+            </div>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-card">
+                <div class="LAY-app-message-btns" style="margin-bottom: 10px;">
+                    <button class="layui-btn layui-btn-danger layuiadmin-btn-tags" data-type="all" data-events="dels">dels</button>
+                </div>
+                <table id="LAY-app-content-tags" lay-filter="LAY-app-content-tags"></table>
+                <script type="text/html" id="table-content-com">
+                    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>del</a>
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+<div th:replace="fragments/footerPage :: footerPage"></div>
+
+<script type="text/javascript">
+    var ItemId = "Item3_2";
+    /*<![CDATA[*/
+    layui.use(['table'], function(){
+        var table = layui.table;
+        table.render({
+            elem: '#LAY-app-content-tags'
+            ,url: '/consumption/log'
+            ,toolbar: '#toolbarDemo'
+            ,defaultToolbar: ['filter', 'exports', 'print', {
+                title: 'info'
+                ,layEvent: 'LAYTABLE_TIPS'
+                ,icon: 'layui-icon-tips'
+            }]
+            ,title: 'Jobs List'
+            ,cols: [
+                [
+                {type: 'checkbox', fixed: 'left'}
+                ,{field: 'id', width: 100, title: 'v', sort: true}
+                ,{field: 'cid', title: 'CPU number', minWidth: 100, sort: true}
+                ,{field: 'idle', title: 'idle state', minWidth: 100, sort: true}
+                ,{field: 'busy', title: 'busy state', minWidth: 100}
+                ,{field: 'total ', title: 'Total energy consumption', minWidth: 100}
+                ,{field: 'startDate ', title: 'Record Date', minWidth: 100}
+                ,{title: 'operation', width: 150, align: 'center', fixed: 'right', toolbar: '#table-content-com'}
+            ]
+            ]
+            ,page: true
+            ,limit: 30
+            ,limits: [10, 20, 30, 50, 100,150,200]
+            ,text: 'error'
+        });
+
+        table.on('tool(LAY-app-content-tags)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'del'){
+                layer.prompt({
+                    formType: 1
+                    ,title: 'Sensitive operation, please verify password'
+                }, function(value, index){
+                    layer.close(index);
+                    layer.confirm('Really delete it?', function(index){
+                        var jsonData = {};
+                        jsonData["id"] =data.id;
+                        jsonData["code"] = value;
+                        var params = JSON.stringify(jsonData);
+                        var url = "/permission/user/delete";
+                        ajaxPost(url, params, function (data) {
+                            if (data.code == 0) {
+                                layer.msg(data.msg, {time: 3000, icon: 1});
+                                layui.table.reload('LAY-app-content-tags');
+                            } else {
+                                layer.open({
+                                    title: 'del fail!'
+                                    ,content:data.msg
+                                });return;
+                            }
+                        });
+                        layer.close(index);
+                    });
+                });
+            }
+        });
+    })
+    /*]]>*/
+
+
+
+</script>
+</html>

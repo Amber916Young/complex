@@ -1,0 +1,60 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.complex.mapper.PermissionMapper">
+
+    <update id="updateUserInfo">
+        update  datacenter.userInfo
+        <trim prefix="set" suffixOverrides=",">
+            <if test="loginTime!=null">loginTime=#{loginTime},</if>
+            <if test="loginIp!=null">loginIp=#{loginIp},</if>
+            <if test="loginPosition!=null">loginPosition=#{loginPosition},</if>
+        </trim>
+        where id=#{id}
+    </update>
+    <delete id="deleteUsersByid">
+        delete FROM datacenter.userInfo where id=#{id}
+    </delete>
+
+    <select id="authenticate" parameterType="hashmap" resultType="com.complex.entity.UserInfo" >
+        select *
+        from datacenter.userInfo
+        <where>
+            1=1
+            <if test="username !=null and password!=null">
+                and username=#{username} and password=#{password}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="pageQueryUserData" parameterType="com.complex.utils.Page" resultType="hashmap">
+        select * from datacenter.userInfo
+        <where>
+            1=1
+            <if test="keyWord !=null">
+                and   concat(
+                IFNULL(username,'')
+                ,IFNULL(gender,'')
+                ,IFNULL(loginPosition,'')
+                )
+                like concat('%', #{keyWord}, '%')
+            </if>
+        </where>
+        limit #{start},#{rows}
+    </select>
+    <select id="pageQueryUserCount"  parameterType="com.complex.utils.Page" resultType="int">
+        select count(*) from datacenter.userInfo
+        <where>
+            1=1
+            <if test="keyWord !=null">
+                and   concat(
+                IFNULL(username,'')
+                ,IFNULL(gender,'')
+                ,IFNULL(loginPosition,'')
+                )
+                like concat('%', #{keyWord}, '%')
+            </if>
+        </where>
+    </select>
+</mapper>

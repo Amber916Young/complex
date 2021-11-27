@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="fragments/headerPage :: headerPage"></div>
+<style>
+    .chart_con {
+        margin: 2em 1em 1em 1em;
+        background: aliceblue;
+        border-radius: 5px;
+        padding-top: 1em;
+    }
+    .chart_title{
+        font-size: 1.1em;
+    }
+    .form_chart_main {
+        margin-top: 2em;
+    }
+</style>
+
+<body >
+<div >
+    <div >
+        <div th:replace="fragments/headerSide :: headerSide"></div>
+    </div>
+    <div class="col col-lg-2">
+        <div th:replace="fragments/sidebarPage :: sidebarPage"></div>
+    </div>
+    <div class="col col-lg-10">
+        <div class="panel panel-default form_chart_main">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="glyphicon glyphicon-th"></i> chart</h3>
+            </div>
+            <div class="panel-body">
+                <form class="form-inline" role="form" style="float:left;">
+                    <div class="form-group has-feedback">
+                        <div class="input-group">
+                            <div class="input-group-addon">task number</div>
+                            <input type="text" class="form-control" id="num" placeholder="Input task number">
+                        </div>
+                    </div>
+                    <button onclick="addTask2()" id="queryBtn" type="button" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> add Tasks</button>
+                </form>
+                <hr style="clear:both;">
+                <div class="table-responsive" >
+                    <div class=" chart_con" >
+                        <div id="main" style="width:100%;height:400px;"></div>
+                    </div>
+                    <div class=" " >
+                        <table id="LAY-app-content-tags" lay-filter="LAY-app-content-tags"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+<div th:replace="fragments/footerPage :: footerPage"></div>
+<script type="text/javascript">
+    var num=0;
+    function addTask2(){
+        var url = "/jobs/assign";
+        num = $("#num").val();
+        if(num==""){
+            layer.msg("number is null!", {time: 3000, icon: 5});
+            return;
+        }
+        var jsonData={};
+        jsonData.job_num=num;
+        layer.msg('Loading', {
+            icon: 16
+            ,shade: 0.01
+        });
+        ajaxPost(url, JSON.stringify(jsonData), function (data) {
+            if (data.code == 0) {
+                layer.msg('Loading', {
+                    icon: 16
+                    ,shade: 0.01
+                });
+                $("#num").val("");
+                layer.msg(data.msg, {time: 3000, icon: 1});
+                layui.use(['table'], function() {
+                    var table = layui.table;
+                    table.render({
+                        elem: '#LAY-app-content-tags'
+                        ,url: '/job/log/lastOne/num/'+num //模拟接口
+                        ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+                        ,defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                            title: 'info'
+                            ,layEvent: 'LAYTABLE_TIPS'
+                            ,icon: 'layui-icon-tips'
+                        }]
+                        ,title: 'Jobs List'
+                        ,cols: [
+                            [
+                                {type: 'checkbox', fixed: 'left'}
+                                ,{field: 'jobId', width: 100, title: 'jobId', sort: true}
+                                ,{field: 'jobSize', title: 'jobSize', minWidth: 100, sort: true}
+                                ,{field: 'startDate', title: 'startDate', minWidth: 100, sort: true}
+                                ,{field: 'finishDate', title: 'finishDate', minWidth: 100, sort: true}
+                            ]
+                        ]
+                        ,page: true
+                        ,limit: 30
+                        ,limits: [10, 20, 30, 50, 100,150,200]
+                        ,text: 'error'
+                    });
+                });
+
+            }else {
+                layer.msg(data.msg, {time: 3000, icon: 5});
+            }
+        });
+    }
+
+
+
+    var ItemId = "Item2_2";
+    var myChart = echarts.init(document.getElementById('main'));
+    // var myChart2 = echarts.init(document.getElementById('main2'));
+    var option;
+    var pageno=1;
+    loadCPU(1);
+    function loadCPU(pageno){
+        var jsonData={};
+        jsonData["pageno"]=pageno;
+        var params = JSON.stringify(jsonData);
+        var url = "/energy/load";
+        ajaxPost(url, params, function (data) {
+            if (data.code == 0) {
+                var dataTemp = data.data;
+                if(dataTemp.pageno){
+                    pageno =dataTemp.pageno;
+                }
+                    option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross',
+                            crossStyle: {
+                                color: '#999'
+                            }
+                        }
+                    },
+                    toolbox: {
+                        feature: {
+                            dataView: { show: true, readOnly: false },
+                            magicType: { show: true, type: ['line', 'bar'] },
+                            restore: { show: true },
+                            saveAsImage: { show: true }
+                        }
+                    },
+                    legend: {
+                        data: ['idle', 'busy', 'Total Consumption']
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            data: ['Server1', 'Server2', 'Server3', 'Server4', 'Server5', 'Server6', 'Server7'],
+                            axisPointer: {
+                                type: 'shadow'
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            name: 'energy',
+                            min: 0,
+                            max: 80,
+                            axisLabel: {
+                                formatter: '{value} W'
+                            }
+                        },
+                        {
+                            type: 'value',
+                            name: 'energy',
+                            min: 0,
+                            max: 40,
+                            axisLabel: {
+                                formatter: '{value} W'
+                            }
+                        }
+                    ],
+                    series: [
+                        {
+                            name: 'idle',
+                            type: 'bar',
+                            data: dataTemp.seriesT1
+                        },
+                        {
+                            name: 'busy',
+                            type: 'bar',
+                            data: dataTemp.seriesT2
+                        },
+                        {
+                            name: 'Total Consumption',
+                            type: 'line',
+                            yAxisIndex: 1,
+                            data: dataTemp.seriesT3
+                        }
+                    ]
+                };
+                myChart.setOption(option);
+                setTimeout(() => {
+                    pageno++;
+                    loadCPU(pageno) }, 1000);
+            } else {
+                layer.open({
+                    title: 'query fail!'
+                    ,content:data.msg
+                });return;
+            }
+        });
+    }
+
+
+
+
+</script>
+</html>
