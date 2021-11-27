@@ -2,16 +2,42 @@ package com.complex.datacenter;
 
 
 import com.complex.entity.Job;
+import com.complex.service.TaskService;
 import com.complex.utils.RandomID;
+import com.complex.utils.SpringUtil;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Supplier;
 
+@Data
 public class Server {
     protected Socket[] sockets;
     protected HashMap<Job, Socket> jobToSocketMap;
     protected LinkedList<Job> jobQueue;
     protected int totalJobs;
     protected int jobsInServer;
+    private int status;
+    private  int cid;
+    private  String  cdate;
+    private double utilization;
+    private double idle;
+    private double busy;
+    private double totalP;
+
+    TaskService taskService = (TaskService) SpringUtil.getBean("taskService");
+
+    @Override
+    public String toString() {
+        return "Server{" +
+                ", status=" + status +
+                ", cid=" + cid +
+                ", cdate='" + cdate + '\'' +
+                ", utilization=" + utilization +
+                '}';
+    }
 
     protected Experiment experiment;
 
@@ -36,7 +62,7 @@ public class Server {
         }
     }
 
-    public Server(final int numberOfSockets,
+    public Server(final Integer numberOfSockets,
                   final int numberOfCoresPerSocket){
         this.jobQueue=new LinkedList<Job>();
         this.sockets=new Socket[numberOfSockets];
@@ -55,7 +81,22 @@ public class Server {
         }
         this.totalJobs++;
     }
-
+    public double getPower() {
+        double power = 0.0;
+        double power2 = 0.0;
+        for (int i = 0; i < this.sockets.length; i++) {
+            power += this.sockets[i].getPower().get("idle");
+            power2 += this.sockets[i].getPower().get("busy");
+        }
+        System.err.println("idle power"+power);
+        System.err.println("busy power"+power2);
+        double total_power= power+power2;
+        System.err.println("total power"+total_power);
+        setIdle(power);
+        setBusy(power2);
+        setTotalP(total_power);
+        return power;
+    }
 
     public void process2(final double time, final List<Job> jobList) throws InterruptedException {
         Socket targetSocket = null;
@@ -66,7 +107,6 @@ public class Server {
 
         for (int i = 0; i < this.sockets.length; i++) {
             Socket currentSocket = this.sockets[i];
-
             double currentUtilization = currentSocket.getInstantUtilization();
             System.err.println("currentUtilization1111-->"+currentUtilization);
             if (currentUtilization > highestUtilization
@@ -74,7 +114,6 @@ public class Server {
                 highestUtilization = currentUtilization;
                 mostUtilizedSocket = currentSocket;
             }
-
             if (currentUtilization < lowestUtilization
                     && currentSocket.getRemainingCapacity() > 0) {
                 lowestUtilization = currentUtilization;
@@ -88,6 +127,19 @@ public class Server {
         }
         double currentUtilization = targetSocket.getInstantUtilization();
         System.err.println("currentUtilization222-->"+currentUtilization);
+        setUtilization(currentUtilization);
+        getPower();
+        System.err.println(toString());
+        HashMap keyset = new HashMap();
+        keyset.put("cid",getCid());
+        keyset.put("utilization",currentUtilization*100);
+        keyset.put("cdate",getCdate());
+        keyset.put("idle",getIdle());
+        keyset.put("busy",getBusy());
+        keyset.put("total_power",getTotalP());
+        taskService.insertCPURealTime(keyset);
+        taskService.insertPower(keyset);
+
         if(targetSocket.getRemainingCapacity()>0){
             targetSocket.process(System.currentTimeMillis()/1000);
         }
@@ -180,4 +232,7 @@ public class Server {
 //        server.process(System.currentTimeMillis()/1000,job);
 //        server.process(System.currentTimeMillis()/1000,job2);
     }
+
+
+
 }

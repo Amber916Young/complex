@@ -14,7 +14,7 @@ function ajax(url, params, method, callBack) {
             callBack(json);
         },
         error : function(json) {
-            alert("访问出错！");
+            console.log("访问出错！");
             return false;
         }
     });

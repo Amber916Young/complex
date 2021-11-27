@@ -17,12 +17,18 @@ spring:
     check-template-location: true
     suffix: .html
     encoding: utf-8
-    mode: HTML
+    mode: LEGACYHTML5
   #这个是关键，放开springboot对静态资源的拦截
   mvc:
     static-path-pattern: /static/**
   resources:
-    static-locations: classpath:/templates/,classpath:/resources/,classpath:/resources/,classpath:/static/
+    static-locations:  classpath:/templates/,classpath:/static/image/,classpath:/static/
+
+ip2region:
+  external: false
+  index-block-size: 4096
+  total-header-size: 8192
+  location: classpath*:/resources/ip2region.db
 
 mybatis:
   mapper-locations: classpath:mapper/*Mapper.xml # The path where the configuration mapper file is located

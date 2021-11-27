@@ -14,8 +14,8 @@ import java.util.HashMap;
 @Data
 public class AJAXReturn extends HashMap<String, Object> {
     private static final long serialVersionUID = 1L;
-    public static final String CODE_TAG = "errcode";
-    public static final String MSG_TAG = "errmsg";
+    public static final String CODE_TAG = "code";
+    public static final String MSG_TAG = "msg";
     public static final String Count_TAG = "count";
     public static final String DATA_TAG = "data";
 
@@ -56,12 +56,12 @@ public class AJAXReturn extends HashMap<String, Object> {
     /**
      * 状态码
      */
-    public int errcode;
+    public int code;
 
     /**
      * 返回内容
      */
-    public String errmsg;
+    public String msg;
 
     /**
      * 数据对象
@@ -211,21 +211,6 @@ public class AJAXReturn extends HashMap<String, Object> {
         this.type = type;
     }
 
-    public int getErrcode() {
-        return errcode;
-    }
-
-    public void setErrcode(int errcode) {
-        this.errcode = errcode;
-    }
-
-    public String getErrmsg() {
-        return errmsg;
-    }
-
-    public void setErrmsg(String errmsg) {
-        this.errmsg = errmsg;
-    }
 
     public Object getData() {
         return data;
@@ -255,8 +240,8 @@ public class AJAXReturn extends HashMap<String, Object> {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE).append("errcode", getErrcode())
-                .append("errmsg", getErrmsg()).append("data", getData()).toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE).append("code", getCode())
+                .append("msg", getMsg()).append("data", getData()).toString();
     }
 
 }

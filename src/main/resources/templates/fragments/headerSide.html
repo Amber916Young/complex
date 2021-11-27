@@ -4,8 +4,8 @@
       <a class="navbar-brand" href="/"><span class="fa fa-codiepie"></span>Data Center</a>
     </div>
     <ul class="nav navbar-nav navbar-right">
-      <li><a href="###"><span class="glyphicon glyphicon-user"></span>Hello tothemoon </a></li>
-      <li><a href="${cx}/logout"><span class="glyphicon glyphicon-log-out"></span>logout</a></li>
+      <li><a href="###"><span class="glyphicon glyphicon-user" th:text="${session?.user?.username}"></span></a></li>
+      <li><a onclick="LogOut()"><span class="glyphicon glyphicon-log-out"></span>logout</a></li>
     </ul>
   </div>
 </div>

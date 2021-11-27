@@ -1,8 +1,14 @@
 package com.complex.datacenter;
 
 import com.complex.entity.Job;
+import com.complex.service.TaskService;
+import com.complex.utils.SpringUtil;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Vector;
@@ -10,6 +16,7 @@ import java.util.Iterator;
 
 @Data
 public class Socket {
+
 
     private Vector<Core> availableCores;
     private Vector<Core> busyCores;
@@ -34,6 +41,9 @@ public class Socket {
 
     }
 
+    public Vector<Core> getBusyCores(){
+        return this.busyCores;
+    }
     public Vector<Core> getAvailableCores(){
         return this.availableCores;
     }
@@ -65,14 +75,6 @@ public class Socket {
 
     public synchronized void  removeJob(final double time,
                           final Job oneJob){
-
-//        for(ConcurrentHashMap.Entry<Job,Core> entry: jobToCore.entrySet()) {
-//            Job key =entry.getKey();
-//            if (key.equals(oneJob)){
-//                core =entry.getValue();
-//                break;
-//            }
-//        }
         Core core = null;
         ConcurrentHashMap<Job,Core> tempjobToCore = new ConcurrentHashMap<>();
         for (Iterator<Map.Entry<Job, Core>> iterator =
@@ -101,17 +103,45 @@ public class Socket {
             this.availableCores.add(core);
         }
     }
+    public HashMap<String, Double> getPower() {
+        double power=0.0;
+        double power2=0.0;
+        HashMap map = new HashMap();
+        Iterator<Core> idleCoreIter = this.getAvailableCores().iterator();
+        while (idleCoreIter.hasNext()) {
+            Core core = idleCoreIter.next();
+            double corePower = core.getPower(1);
+            power += corePower;
+        }
+        map.put("idle",power);
+        Iterator<Core> busyCoreIter = this.getBusyCores().iterator();
+        while (busyCoreIter.hasNext()) {
+            Core core = busyCoreIter.next();
+            double corePower = core.getPower(2);
+            power2 += corePower;
+        }
+        map.put("busy",power2);
+        return map;
+    }
 
-    public void process(double time) {
+    TaskService taskService = (TaskService) SpringUtil.getBean("taskService");
+
+    public synchronized void process(double time) {
         if(jobToCore.size()==0){
             System.out.println("No job, free time!");
         }else{
-            for(ConcurrentHashMap.Entry<Job,Core>entry : jobToCore.entrySet()){
+            ConcurrentHashMap<Job,Core> tempjobToCore =new ConcurrentHashMap<>();
+            for(ConcurrentHashMap.Entry<Job,Core> entry : jobToCore.entrySet()){
+                tempjobToCore.put(entry.getKey(),entry.getValue());
+            }
+            for(ConcurrentHashMap.Entry<Job,Core> entry : tempjobToCore.entrySet()){
                 Job job=entry.getKey();
                 Core core=entry.getValue();
                 core.assignJob(time,job);
                 core.process(time);
                 if(core.getJob()==null){
+                    System.out.println(job);
+                    taskService.insertJobs_real(job);
                     this.removeJob(System.currentTimeMillis()/1000,job);
                 }else{
                     core.getJob().print();

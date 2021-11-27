@@ -21,13 +21,85 @@
                #{cdate}
               )
     </insert>
+    <insert id="insertCPURealTime">
+        insert into datacenter.cpu_date_real (cid,utilization,cdate)
+        values(#{cid},
+               #{utilization},
+               #{cdate}
+              )
+    </insert>
+    <insert id="insertJobs_real" parameterType="com.complex.entity.Job">
+        insert into datacenter.Job(
+                                   jobId,
+                                   jobSize,
+                                   startTime,
+                                   finishTime,
+                                   startDate,
+                                   finishDate)
+        values(#{jobId},
+               #{jobSize},
+               #{startTime},
+               #{finishTime},
+               #{startDate},
+               #{finishDate})
 
-
+    </insert>
+    <insert id="insertPower" parameterType="hashmap">
+        insert into datacenter.Comsumption(
+            idle,
+            busy,
+            cid,
+            total_power,
+            startDate
+            )
+        values(#{idle},
+               #{busy},
+               #{cid},
+               #{total_power},
+               #{cdate}
+               )
+    </insert>
+    <insert id="insertSelective">
+        insert into datacenter.logger(
+            method,
+            operateTime,
+            user,
+            behavior
+        )
+        values(#{method},
+               #{operateTime},
+               #{user},
+               #{behavior}
+              )
+    </insert>
+    <delete id="deleteJobsByid">
+        delete FROM datacenter.Job where id=#{id}
+    </delete>
+    <delete id="deleteCpusByid">
+        delete FROM datacenter.cpu_date_real where cdate=#{id}
+    </delete>
+    <select id="queryAllCPUTime_real" resultType="java.lang.String">
+        select DISTINCT(cdate)
+        from datacenter.cpu_date_real
+                 limit #{pageno},#{rows}
+    </select>
+    <select id="queryAllCPU_real" resultType="hashmap">
+        select utilization,cdate
+        from datacenter.utilization_real
+        <where>
+            1=1
+            <if test="cid !=null">
+                and  cid=#{cid}
+            </if>
+        </where>
+        limit #{pageno},#{rows}
+    </select>
     <select id="queryAllCPUTime" resultType="java.lang.String">
         select DISTINCT(cdate)
         from datacenter.utilization
             limit #{pageno},#{rows}
     </select>
+
     <select id="queryAllCPU" resultType="java.lang.Integer">
         select utilization
         from datacenter.utilization
@@ -39,5 +111,129 @@
         </where>
           limit #{pageno},#{rows}
     </select>
+    <select id="pageQueryData" parameterType="com.complex.utils.Page" resultType="hashmap">
+        select * from datacenter.utilization
+        <where>
+            1=1
+            <if test="keyWord !=null">
+                and   concat(
+                IFNULL(name,'')
+                ,IFNULL(utilization,'')
+                )
+                like concat('%', #{keyWord}, '%')
+            </if>
+        </where>
+        limit #{start},#{rows}
+    </select>
+    <select id="pageQueryCount"  parameterType="com.complex.utils.Page" resultType="int">
+        select count(*) from datacenter.utilization
+        <where>
+            1=1
+            <if test="keyWord !=null">
+                and   concat(
+                IFNULL(name,'')
+                ,IFNULL(utilization,'')
+                )
+                like concat('%', #{keyWord}, '%')
+            </if>
+        </where>
+    </select>
+    <select id="queryAllServer" resultType="HashMap">
+        select * from datacenter.Server
+        <where>
+            1=1
+            <if test="status !=null">
+                and  status=#{status}
+            </if>
+        </where>
+    </select>
+    <select id="pageQueryJobData" resultType="java.util.HashMap">
+        select * from datacenter.Job
+        <where>
+            1=1
+            <if test="keyWord !=null">
+                and   concat(
+                IFNULL(jobSize,'')
+                ,IFNULL(jobId,'')
+                ,IFNULL(startDate,'')
+                ,IFNULL(finishDate,'')
+                )
+                like concat('%', #{keyWord}, '%')
+            </if>
+        </where>
+        limit #{start},#{rows}
+    </select>
+    <select id="pageQueryJobData2" resultType="java.util.HashMap">
+        select * from datacenter.Job
+        limit #{start},#{rows}
+    </select>
+    <select id="pageQueryJobCount" resultType="java.lang.Integer">
+        select count(*) from datacenter.Job
+        <where>
+            1=1
+            <if test="keyWord !=null">
+                and   concat(
+                IFNULL(jobSize,'')
+                ,IFNULL(jobId,'')
+                ,IFNULL(startDate,'')
+                ,IFNULL(finishDate,'')
+                )
+                like concat('%', #{keyWord}, '%')
+            </if>
+        </where>
+    </select>
+    <select id="queryAllCPUTime_realSize" resultType="java.util.HashMap">
+        select * from datacenter.utilization_real
+    </select>
+    <select id="queryAllCPUTimeSize" resultType="java.util.HashMap">
+        select * from datacenter.utilization
+    </select>
+    <select id="pageQueryConsumptionData" resultType="java.util.HashMap">
+        select * from datacenter.Comsumption
+        limit #{start},#{rows}
+    </select>
+    <select id="pageQueryConsumptionCount" resultType="java.lang.Integer">
+        select count(*) from datacenter.Comsumption
+    </select>
+    <select id="queryAllConsumption" resultType="java.util.HashMap">
+        select *
+        from datacenter.Comsumption
+        limit #{pageno},#{rows}
+    </select>
+    <select id="pageQueryLoggerData" resultType="java.util.HashMap">
+        select * from datacenter.logger
+        <where>
+            1=1
+            <if test="keyWord !=null">
+                and   concat(
+                IFNULL(method,'')
+                ,IFNULL(user,'')
+                ,IFNULL(behavior,'')
+                ,IFNULL(operateTime,'')
+                )
+                like concat('%', #{keyWord}, '%')
+            </if>
+        </where>
+        ORDER BY operateTime desc
+        limit #{start},#{rows}
+    </select>
+    <select id="pageQueryLoggerCount" resultType="java.lang.Integer">
+        select count(*) from datacenter.logger
+        <where>
+            1=1
+            <if test="keyWord !=null">
+                and   concat(
+                IFNULL(method,'')
+                ,IFNULL(user,'')
+                ,IFNULL(behavior,'')
+                ,IFNULL(operateTime,'')
+                )
+                like concat('%', #{keyWord}, '%')
+            </if>
+        </where>
+    </select>
+    <delete id="deleteLoggerByid">
+        delete FROM datacenter.logger where id=#{id}
+    </delete>
 
 </mapper>

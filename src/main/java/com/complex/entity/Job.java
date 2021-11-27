@@ -1,5 +1,6 @@
 package com.complex.entity;
 
+import com.complex.utils.RandomID;
 import lombok.Data;
 
 @Data
@@ -31,7 +32,7 @@ public class Job {
     //constructor
     public Job(final double theJobSize) {
         this.jobSize = theJobSize;
-        this.jobId = assignId();
+        this.jobId = RandomID.genIDWorker();
     }
 
 //    public final void markArrival(final double time) {
@@ -46,6 +47,13 @@ public class Job {
         this.finishTime = time;
     }
 
-
+/*
+(startTime=1.63794323E9,
+startDate=2021-11-26 16:13:57.926,
+finishDate=2021-11-26 16:13:58.435,
+finishTime=1.637943231E9,
+ jobId=3, jobSize=2.0)
+*
+**/
 
 }

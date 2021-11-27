@@ -19,11 +19,22 @@ public class Core {
     public Core() {
         this.job = null;
         this.speed = 2.0;
-        dynamicPower = 40.0 * (4.0 / 5.0) / 2;
+        dynamicPower = 20.0 * (4.0 / 8.0) / 2;
         parkPower = 0;
-        idlePower = dynamicPower / 5.0;
+        idlePower = dynamicPower / 8.0;
     }
-
+    public double getPower(int type) {
+//        if (this.job != null){
+//            return this.dynamicPower - this.idlePower;
+//        }else{
+//            return this.idlePower;
+//        }
+        if (type==2){
+            return this.dynamicPower - this.idlePower;
+        }else{
+            return this.idlePower;
+        }
+    }
     public void print(){
         if(this.job!=null) {
             this.job.print();
@@ -55,7 +66,8 @@ public class Core {
             }
             while(currentProgress<job.getJobSize()){
                 currentProgress+=this.speed;
-                Thread.sleep(1000);
+                Thread.sleep(100);
+//                System.err.println("111===》"+getPower(2));
             }
             if(currentProgress>=job.getJobSize()){
                 this.job.markFinish(time+currentProgress/this.speed);
@@ -64,6 +76,7 @@ public class Core {
                 this.job.print();
                 System.out.println("Job "+this.job.getJobId()+" is finished.");
                 this.job=null;
+//                System.err.println("222===》"+getPower(1));
             }
         }
     }

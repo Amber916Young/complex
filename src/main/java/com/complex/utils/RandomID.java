@@ -4,8 +4,8 @@ import java.util.Random;
 
 public class RandomID {
     public static int getCPUID(){
-        int max = 6;
-        int min = 1;
+        int max = 4;
+        int min = 0;
         Random random = new Random();
         int s = random.nextInt(max) % (max - min + 1) + min;
         return s;
@@ -45,6 +45,20 @@ public class RandomID {
         int s = random.nextInt(max) % (max - min + 1) + min;
         return s;
     }
+    public static int getCPUNumTE(){
+        int max = 20;
+        int min = 0;
+        Random random = new Random();
+        int s = random.nextInt(max) % (max - min + 1) + min;
+        return s;
+    }
+    public static int getCPUNumTE2(){
+        int max = 5;
+        int min = 0;
+        Random random = new Random();
+        int s = random.nextInt(max) % (max - min + 1) + min;
+        return s;
+    }
     public static int genID(){
         int max = 10;
         int min = 2;
@@ -61,12 +75,12 @@ public class RandomID {
         return String.valueOf(s);
     }
 
-    public static String genIDWorker(){
+    public static int genIDWorker(){
         int max = 30000;
-        int min = 20001;
+        int min = 1;
         Random random = new Random();
         int s = random.nextInt(max) % (max - min + 1) + min;
-        return String.valueOf(s);
+        return s;
     }
 
 }

@@ -1,25 +1,42 @@
 <footer  th:fragment="footerPage"  xmlns:th="http://www.thymeleaf.org"  >
     <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
-    <script type="text/javascript" src="static/js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" th:href="@{/js/jquery-2.1.4.min.js}"  src="/static/js/jquery-2.1.4.min.js"></script>
 <!--    弹出层-->
-    <script type="text/javascript" src="static/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/layer/layer.js" th:href="@{/js/layer/layer.js}"></script>
 
+    <script src="/static/layui/layui.js" th:href="@{/layui/layui.js}"></script>
     <!-- Bootstrap 核心 JavaScript 文件 -->
-    <script type="text/javascript" src="/static/css/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="static/js/ajaxHandle.js"></script>
+    <script type="text/javascript" src="/static/css/bootstrap/3.3.7/js/bootstrap.min.js"  th:href="@{/css/bootstrap/3.3.7/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" src="/static/js/ajaxHandle.js" th:href="@{/js/ajaxHandle.js}" ></script>
     <!-- metisMenu -->
-    <script type="text/javascript" src="static/metismenu/metisMenu.min.js"></script>
+    <script type="text/javascript" src="/static/metismenu/metisMenu.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
 
-
-
     <script>
+        function LogOut(){
+            var url="/permission/web/logout"
+            ajaxPost(url, {}, function (data) {
+                if (data.code == 0) {
+                    layer.msg(data.msg, {time: 3000, icon: 1});
+                    setTimeout(() => {
+                        window.location.href="/index/login";
+                    }, 3000);
+                } else {
+                    layer.msg(data.msg, {time: 3000, icon: 5});
+                    return;
+                }
+            });
+        }
         $(function () {
             $('#menu').metisMenu();
             //根据页面传进来的ItemId设置菜单状态
             // var url = window.location;
             //获取Id对应的菜单
             console.log("ItemId=" + ItemId);
+            if(ItemId==null){
+                return;
+            }
             var element = $('#' + ItemId);
 
             console.log(element.html());
